@@ -1,11 +1,13 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const teams = require('./teams.json')
+// teams = require('./teams.json')
+const models = require('./models')
 
 const app = express()
 
-app.get('/teams', (request, response) => {
-    response.send(teams)
+app.get('/teams', async (request, response) => {
+    const teamsres = await models.teams.findAll()
+    response.send(teamsres)
 })
 
 app.get('/teams/:x', (request, response) => {
@@ -20,14 +22,21 @@ app.get('/teams/:x', (request, response) => {
     }
 })
 app.use(bodyParser.json())
-app.post('/teams', (request, response) => {
-    const { id, location, mascot, abbreviation, conference, division } = request.body
-    if (!id || !location, !mascot, !abbreviation, !conference, !division) {
+app.post('/teams', async (request, response) => {
+    const { location, mascot, abbreviation, conference, division } = request.body
+    if (!location || !mascot || !abbreviation || !conference || !division) {
         response.status(400).send('The following attributes are required: id, location, mascot, abbreviation, conference, division')
     }
 
-    const newTeam = { id, location, mascot, abbreviation, conference, division }
-    teams.push(newTeam)
+    //const lastId = teams.reduce((acc, team) => {
+    //  return team.id > acc ? team.id : acc
+    //condition true or acc
+    // }, 0)
+    //const newTeam = { id: (lastId + 1), location, mascot, abbreviation, conference, division }
+    //teams.push(newTeam)
+    const newTeam = await models.teams.create({
+        location, mascot, abbreviation, conference, division
+    })
     response.status(201).send(newTeam)
 })
 
